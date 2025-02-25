@@ -1,37 +1,37 @@
 <?php
 header("Access-Control-Allow-Origin: *");
 header("Access-Control-Allow-Headers: Content-Type");
-// Database connection (Update with your actual database credentials)
-// Database connection (Update with your actual database credentials)
+
 $servername = "localhost";
 $username = "root";
 $password = "";
-$dbname = "user_db";  // Update with your actual database name
+$dbname = "user_db";
 
-// Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
 if ($conn->connect_error) {
-    die("Connection failed: " . $conn->connect_error);
+    echo json_encode(["success" => false, "message" => "Connection failed: " . $conn->connect_error]);
+    exit;
 }
 
-// Query to fetch distinct client names from projects table
-$query = "SELECT DISTINCT client_name FROM projects WHERE client_name IS NOT NULL";
+// Query to fetch distinct clients with IDs and names
+$query = "SELECT DISTINCT id, client_name FROM projects WHERE client_name IS NOT NULL AND client_name != ''";
 $result = $conn->query($query);
 
 $companies = [];
 if ($result->num_rows > 0) {
-    // Fetching all client names
     while ($row = $result->fetch_assoc()) {
-        $companies[] = $row['client_name'];
+        $companies[] = [
+            "id" => $row['id'],
+            "client_name" => $row['client_name']
+        ];
     }
-} else {
-    $companies = ['No companies found'];  // Fallback if no data is found
 }
 
 $conn->close();
 
-// Return JSON response with companies data
-echo json_encode($companies);
+// Return JSON response
+echo json_encode([
+    "success" => true,
+    "companies" => $companies
+]);
 ?>

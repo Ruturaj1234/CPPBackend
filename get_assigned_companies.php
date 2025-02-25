@@ -9,15 +9,12 @@ $username = "root";
 $password = "";
 $dbname = "user_db";
 
-// Create connection
 $conn = new mysqli($servername, $username, $password, $dbname);
-
-// Check connection
 if ($conn->connect_error) {
     die(json_encode(["error" => "Connection failed: " . $conn->connect_error]));
 }
 
-// SQL query to fetch companies assigned a project
+// Fetch companies with active assigned projects (not marked as done)
 $sql = "
     SELECT DISTINCT 
         p.id AS company_id, 
@@ -29,15 +26,14 @@ $sql = "
         client_projects cp ON a.project_id = cp.id
     INNER JOIN 
         projects p ON cp.client_id = p.id
+    LEFT JOIN 
+        project_done pd ON pd.project_id = cp.id AND pd.is_project_done = 1
     WHERE 
-        a.project_id IS NOT NULL
+        a.project_id IS NOT NULL AND (pd.id IS NULL OR pd.is_project_done = 0)
 ";
-
 $result = $conn->query($sql);
 
 $companies = [];
-
-// Fetch the results
 if ($result->num_rows > 0) {
     while ($row = $result->fetch_assoc()) {
         $companies[] = [
@@ -50,6 +46,5 @@ if ($result->num_rows > 0) {
 
 $conn->close();
 
-// Return the result as JSON
 echo json_encode($companies);
 ?>
