@@ -1,6 +1,6 @@
 <?php
 header('Access-Control-Allow-Origin: *');
-header('Access-Control-Allow-Methods: GET, POST'); // Allow both GET and POST methods
+header('Access-Control-Allow-Methods: GET, POST');
 header('Access-Control-Allow-Headers: Content-Type');
 header('Content-Type: application/json');
 
@@ -17,11 +17,12 @@ try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $data = json_decode(file_get_contents("php://input"));
         if (isset($data->id)) {
-            $employee_id = (int)$data->id;  // Ensure the ID is a valid integer
+            $employee_id = (int)$data->id;
 
             $query = "
-                SELECT id, name, age, address, account_number, ifsc_code,
-                       salary_basic, salary_da, salary_hra, salary_maintenance
+                SELECT id, name, address, account_number, ifsc_code,
+                       salary_basic, salary_da, salary_hra, salary_maintenance,
+                       image, date_of_birth, contact_number, email
                 FROM employee_details2
                 WHERE id = :id
             ";
@@ -32,7 +33,7 @@ try {
             $employee = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($employee) {
-                echo json_encode([$employee]); // Wrap the employee data in an array
+                echo json_encode([$employee]);
             } else {
                 echo json_encode(['error' => 'Employee not found']);
             }
@@ -42,8 +43,9 @@ try {
     } else {
         // Default behavior: Fetch all employees via GET
         $query = "
-            SELECT id, name, age, address, account_number, ifsc_code,
-                   salary_basic, salary_da, salary_hra, salary_maintenance
+            SELECT id, name, address, account_number, ifsc_code,
+                   salary_basic, salary_da, salary_hra, salary_maintenance,
+                   image, date_of_birth, contact_number, email
             FROM employee_details2
         ";
         $stmt = $conn->prepare($query);
